@@ -137,7 +137,7 @@ class webServerHandler(BaseHTTPRequestHandler):
                     session.commit()
                     self.send_response(301)
                     self.send_header('content-type', "text/html")
-                    self.send_header('Location', "/startups")
+                    self.send_header('Location', "/")
                     self.end_headers()
 
             if self.path.endswith('/delete'):
@@ -153,7 +153,7 @@ class webServerHandler(BaseHTTPRequestHandler):
                     session.commit()
                     self.send_response(301)
                     self.send_header('content-type', "text/html")
-                    self.send_header('Location', "/startups")
+                    self.send_header('Location', "/")
                     self.end_headers()
 
             if self.path.endswith('/startups/new'):
@@ -167,7 +167,7 @@ class webServerHandler(BaseHTTPRequestHandler):
                     session.commit()
                     self.send_response(301)
                     self.send_header('content-type', "text/html")
-                    self.send_header('Location', "/startups")
+                    self.send_header('Location', "/")
                     self.end_headers()
 
             if self.path.endswith('/add'):
