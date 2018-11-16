@@ -32,12 +32,41 @@ class webServerHandler(BaseHTTPRequestHandler):
                 output = ""
                 output += "<html><body>"
                 output += "<a href=\"/startups/new\">create startup!</a>"
+                output +="<br>"
                 for startup in startups:
-                    output += "<p>"+startup.name+"</p>"
+                    output +="<br>"
+                    output += "<a href='/startups/%s/details'>%s</a>"%(startup.id,startup.name)
+                    output +="<br>"
                     output += "<a href='/startups/%s/edit'> edit</a> "%startup.id
                     output += "<a href='/startups/%s/delete' > delete </a>"%startup.id
+                    output +="<br><br>"
                 output += "</body></html>"
                 self.wfile.write(output)
+
+                return
+
+            if self.path.endswith("/details"):
+                startup_id = self.path.split("/")[2]
+                startup = session.query(Startup).filter_by(id=startup_id).one()
+                if startup:
+                    self.send_response(200)
+                    self.send_header('Content-type', 'text/html')
+                    self.end_headers()
+                    founders = session.query(Founder).filter_by(startup_id=startup_id).all()
+                    output = ""
+                    output += "<html><body>"
+                    output += "Startup: %s"%startup.name
+                    output += "<br/>"
+                    for founder in founders:
+                        output += "<p>"+founder.name+"</p>"
+                        output += "<p>"+founder.bio+"</p>"
+                        output += "<br/>"
+                    output += "<form method ='POST' enctype='multipart/form-data' action ='/startup/%s/details/add'>"%startup.id
+                    output += "<input type='text' name='name' placeholder='name'/>"
+                    output += "<input type='text' name='bio' placeholder='bio'/>"
+                    output += "<button type='submit'> add founder! </button>"
+                    output += "</form></body></html>"
+                    self.wfile.write(output)
 
                 return
 
@@ -140,13 +169,29 @@ class webServerHandler(BaseHTTPRequestHandler):
                     self.send_header('content-type', "text/html")
                     self.send_header('Location', "/startups")
                     self.end_headers()
+
+            if self.path.endswith('/add'):
+                ctype, pdict = cgi.parse_header(
+                    self.headers.getheader('content-type'))
+                if ctype == 'multipart/form-data':
+                    fields = cgi.parse_multipart(self.rfile, pdict)
+                    startup_id = self.path.split("/")[2]
+                    founder_name = fields.get('name')
+                    founder_bio = fields.get('bio')
+                    founder = Founder(name=founder_name[0],bio=founder_bio[0],startup_id=startup_id)
+                    session.add(founder)
+                    session.commit()
+                    self.send_response(301)
+                    self.send_header('content-type', "text/html")
+                    self.send_header('Location', "/startups/%s/details"%startup_id)
+                    self.end_headers()
         except:
             pass
 
 
 def main():
     try:
-        port = 8080
+        port = 8000
         server = HTTPServer(('', port), webServerHandler)
         print "Web Server running on port %s" % port
         server.serve_forever()
