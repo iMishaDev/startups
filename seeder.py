@@ -114,4 +114,4 @@ founder2_5 = Founder(name="Nitish", bio="Computer Scientest, Full Stack Develope
 
 session.add(founder2_5)
 session.commit()
-print "added menu items!"
+print "added Startups!"
